@@ -1,0 +1,8 @@
+main: ohks.Main
+name: OneHitKillSurvivors
+version: 0.1
+author: MathiasEklund
+commands:
+
+permissions:
+  ohks.admin:
