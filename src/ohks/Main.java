@@ -1,6 +1,8 @@
 package ohks;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
@@ -12,6 +14,8 @@ public class Main extends JavaPlugin {
 
 	private static Main main;
 
+	MySQL MySQL = null;
+	Connection c = null;
 	File configurationConfig;
 	public FileConfiguration config;
 
@@ -27,6 +31,13 @@ public class Main extends JavaPlugin {
 		config = YamlConfiguration.loadConfiguration(configurationConfig);
 		loadConfig();
 		Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+		MySQL = new MySQL(this, config.getString("sql.ip"), config.getString("sql.port"), config.getString("sql.database"), config.getString("sql.user"), config.getString("sql.pass"));
+		try {
+			c = MySQL.openConnection();
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void savec() {
@@ -41,6 +52,11 @@ public class Main extends JavaPlugin {
 	public void loadConfig() {
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add("Default Lore");
+		config.addDefault("sql.pass", "password");
+		config.addDefault("sql.user", "minecraft");
+		config.addDefault("sql.database", "ohks");
+		config.addDefault("sql.port", "3306");
+		config.addDefault("sql.ip", "localhost");
 		ArrayList<String> ditems = new ArrayList<String>();
 		ditems.add("item:269 name:Common_Knife");
 		config.addDefault("doctor.items", ditems);

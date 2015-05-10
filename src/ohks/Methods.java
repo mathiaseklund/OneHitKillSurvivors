@@ -26,6 +26,7 @@ public class Methods {
 	Main plugin = Main.getMain();
 	Messages msg = Messages.getInstance();
 	Utils util = Utils.getInstance();
+	SQLMethods sqlm = SQLMethods.getInstance();
 
 	public static Methods getInstance() {
 		return instance;
@@ -140,6 +141,16 @@ public class Methods {
 	}
 
 	public void killPlayer(Player player, Player killer) {
+		player.setHealth(6);
+		player.teleport(Bukkit.getWorld("world").getSpawnLocation());
+		Lists.ingame.remove(player.getName());
+		Lists.classtype.remove(player.getName());
+		sqlm.addKill(killer);
+		int kills = Lists.kills.get(player.getName());
+		kills++;
+		Lists.kills.remove(player.getName());
+		Lists.kills.put(player.getName(), kills);
+		updateScoreboard(player, kills);
 
 	}
 
@@ -157,6 +168,7 @@ public class Methods {
 
 	@SuppressWarnings("null")
 	public void giveItems(Player player) {
+		player.getInventory().clear();
 		String classtype = Lists.classtype.get(player.getName());
 		ArrayList<String> items = new ArrayList<String>();
 		items.addAll(plugin.config.getStringList(classtype + ".items"));
@@ -199,6 +211,11 @@ public class Methods {
 				is.setItemMeta(im);
 				player.getInventory().addItem(is);
 			}
+		}
+
+		for (int i = 4; i < player.getInventory().getSize(); i++) {
+			ItemStack is = new ItemStack(Material.getMaterial(160), 1, (short) 15);
+			player.getInventory().setItem(i, is);
 		}
 	}
 }

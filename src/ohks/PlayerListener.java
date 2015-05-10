@@ -14,7 +14,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -85,6 +87,9 @@ public class PlayerListener implements Listener {
 			Player player = (Player) event.getEntity();
 			if (event.getDamager() instanceof Player) {
 				Player damager = (Player) event.getDamager();
+				if (damager.getItemInHand() == null || damager.getItemInHand().getType() == Material.AIR) {
+					event.setDamage(1.0);
+				}
 				double health = player.getHealth();
 				double damage = event.getDamage();
 				if ((health - damage) <= 0) {
@@ -107,7 +112,7 @@ public class PlayerListener implements Listener {
 		String title = inv.getTitle();
 		if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.title")))) {
 			event.setCancelled(true);
-			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+			if (event.getCurrentItem() != null || event.getCurrentItem().getType() != Material.AIR) {
 				ItemStack is = event.getCurrentItem();
 				if (is.hasItemMeta()) {
 					ItemMeta im = is.getItemMeta();
@@ -120,6 +125,20 @@ public class PlayerListener implements Listener {
 					}
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event) {
+		Player player = event.getPlayer();
+		Lists.id.remove(player.getName());
+	}
+
+	@EventHandler
+	public void onItemHeldChange(PlayerItemHeldEvent event) {
+		Player player = event.getPlayer();
+		if (event.getNewSlot() > 4) {
+			event.setCancelled(true);
 		}
 	}
 }
