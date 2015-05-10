@@ -2,8 +2,7 @@ package ohkm;
 
 import java.util.ArrayList;
 
-import net.md_5.bungee.api.ChatColor;
-
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -67,7 +66,7 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
+		final Player player = event.getPlayer();
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			Block b = event.getClickedBlock();
 			Sign sign = (Sign) b.getState();
@@ -82,22 +81,81 @@ public class PlayerListener implements Listener {
 				methods.updateSigns();
 				methods.openClassWindow(player);
 			}
+		} else if (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK) {
+			if (player.getItemInHand() != null && player.getItemInHand().getType() != Material.AIR) {
+				final ItemStack is = player.getItemInHand();
+				player.setItemInHand(new ItemStack(Material.AIR));
+				String classtype = Lists.classtype.get(player.getName());
+				if (classtype.equalsIgnoreCase("knight")) {
+					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+						public void run() {
+							player.setItemInHand(is);
+						}
+					}, 20 * 5);
+				} else if (classtype.equalsIgnoreCase("warrior")) {
+					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+						public void run() {
+							player.setItemInHand(is);
+						}
+					}, 20 * 4);
+				} else if (classtype.equalsIgnoreCase("barbarian")) {
+					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+						public void run() {
+							player.setItemInHand(is);
+						}
+					}, 20 * 5);
+				}
+			} else {
+				event.setCancelled(true);
+			}
 		}
 	}
 
 	@EventHandler
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
-			Player player = (Player) event.getEntity();
+			final Player player = (Player) event.getEntity();
 			if (event.getDamager() instanceof Player) {
 				Player damager = (Player) event.getDamager();
-				if (damager.getItemInHand() == null || damager.getItemInHand().getType() == Material.AIR) {
-					event.setDamage(1.0);
-				}
-				double health = player.getHealth();
-				double damage = event.getDamage();
-				if ((health - damage) <= 0) {
-					methods.killPlayer(player, damager);
+				if (damager.getItemInHand() != null && damager.getItemInHand().getType() != Material.AIR) {
+					event.setDamage(2);
+					if (player.getVelocity() != null) {
+						int rand = util.randInt(1, 2);
+						if (rand == 1) {
+							event.setDamage(0);
+							msg.msg(player, plugin.config.getString("message.dodge").replace("USER", damager.getName()));
+						}
+					}
+					double health = player.getHealth();
+					double damage = event.getDamage();
+					if ((health - damage) <= 0) {
+						event.setDamage(0);
+						methods.killPlayer(player, damager);
+					}
+					final ItemStack is = player.getItemInHand();
+					player.setItemInHand(new ItemStack(Material.AIR));
+					String classtype = Lists.classtype.get(player.getName());
+					if (classtype.equalsIgnoreCase("knight")) {
+						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+							public void run() {
+								player.setItemInHand(is);
+							}
+						}, 20 * 5);
+					} else if (classtype.equalsIgnoreCase("warrior")) {
+						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+							public void run() {
+								player.setItemInHand(is);
+							}
+						}, 20 * 4);
+					} else if (classtype.equalsIgnoreCase("barbarian")) {
+						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+							public void run() {
+								player.setItemInHand(is);
+							}
+						}, 20 * 5);
+					}
+				} else {
+					event.setCancelled(true);
 				}
 			}
 		}
@@ -113,6 +171,9 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
 		Player player = (Player) event.getWhoClicked();
+		if (!player.isOp()) {
+			event.setCancelled(true);
+		}
 		Inventory inv = event.getInventory();
 		String title = inv.getTitle();
 		if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.title")))) {
@@ -122,9 +183,19 @@ public class PlayerListener implements Listener {
 				if (is.hasItemMeta()) {
 					ItemMeta im = is.getItemMeta();
 					String dname = im.getDisplayName();
-					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.citizen.displayname")))) {
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.knight.displayname")))) {
 						Lists.chooseclass.remove(player.getName());
-						Lists.classtype.put(player.getName(), "citizen");
+						Lists.classtype.put(player.getName(), "knight");
+						methods.giveItems(player);
+						methods.spawnPlayer(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.barbarian.displayname")))) {
+						Lists.chooseclass.remove(player.getName());
+						Lists.classtype.put(player.getName(), "barbarian");
+						methods.giveItems(player);
+						methods.spawnPlayer(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.warrior.displayname")))) {
+						Lists.chooseclass.remove(player.getName());
+						Lists.classtype.put(player.getName(), "warrior");
 						methods.giveItems(player);
 						methods.spawnPlayer(player);
 					}
@@ -142,7 +213,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onItemHeldChange(PlayerItemHeldEvent event) {
 		Player player = event.getPlayer();
-		if (event.getNewSlot() > 4) {
+		if (event.getNewSlot() > 0) {
 			event.setCancelled(true);
 		}
 	}

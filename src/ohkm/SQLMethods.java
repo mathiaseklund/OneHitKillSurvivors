@@ -39,13 +39,14 @@ public class SQLMethods {
 
 	public synchronized int newPlayer(Player player) {
 		int keyid = 0;
-		String query = "INSERT INTO accounts (uuid, name,kills) VALUES (?, ?, ?)";
+		String query = "INSERT INTO accounts (uuid, name,kills,gold) VALUES (?, ?, ?, ?)";
 		PreparedStatement ps;
 		try {
 			ps = plugin.c.prepareStatement(query);
 			ps.setString(1, player.getUniqueId().toString());
 			ps.setString(2, player.getName());
 			ps.setInt(3, 0);
+			ps.setInt(4, 0);
 			ps.execute();
 			keyid = getID(player);
 		} catch (SQLException e) {
@@ -79,6 +80,52 @@ public class SQLMethods {
 		try {
 			PreparedStatement ps = plugin.c.prepareStatement(query);
 			ps.setInt(1, kills);
+			ps.setInt(2, Lists.id.get(player.getName()));
+			ps.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized int getGold(Player player) {
+		int id = Lists.id.get(player.getName());
+		int gold = 0;
+		String query = "SELECT gold FROM accounts WHERE id = ?";
+		try {
+			PreparedStatement ps = plugin.c.prepareStatement(query);
+			ps.setInt(1, Lists.id.get(player.getName()));
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				gold = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return gold;
+	}
+
+	public synchronized void setGold(Player player, int gold) {
+		String query = "UPDATE accounts SET gold=? WHERE id=?";
+		try {
+			PreparedStatement ps = plugin.c.prepareStatement(query);
+			ps.setInt(1, gold);
+			ps.setInt(2, Lists.id.get(player.getName()));
+			ps.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized void addGold(Player player, int gold) {
+		msg.sendTitle(player, plugin.config.getString("message.gold").replace("##", gold + ""));
+		gold = gold + getGold(player);
+		String query = "UPDATE accounts SET gold=? WHERE id=?";
+		try {
+			PreparedStatement ps = plugin.c.prepareStatement(query);
+			ps.setInt(1, gold);
 			ps.setInt(2, Lists.id.get(player.getName()));
 			ps.execute();
 		} catch (SQLException e) {
