@@ -1,4 +1,4 @@
-package ohks;
+package ohkm;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

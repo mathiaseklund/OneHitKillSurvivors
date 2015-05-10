@@ -1,4 +1,4 @@
-package ohks;
+package ohkm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +136,7 @@ public class Methods {
 			if (bs instanceof Sign) {
 				Sign sign = (Sign) bs;
 				sign.setLine(2, Lists.ingame.size() + "");
+				sign.update();
 			}
 		}
 	}
@@ -207,9 +208,11 @@ public class Methods {
 					}
 				} else if (str.contains("amount:")) {
 					int amount = Integer.parseInt(str.split(":")[1]);
-					is.setAmount(amount);
+					is.setAmount(2);
 				}
-				is.setItemMeta(im);
+				if (im != null) {
+					is.setItemMeta(im);
+				}
 				player.getInventory().addItem(is);
 			}
 		}

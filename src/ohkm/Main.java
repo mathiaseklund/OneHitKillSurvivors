@@ -1,4 +1,4 @@
-package ohks;
+package ohkm;
 
 import java.io.File;
 import java.sql.Connection;
@@ -18,6 +18,8 @@ public class Main extends JavaPlugin {
 	Connection c = null;
 	File configurationConfig;
 	public FileConfiguration config;
+	File itemConfig;
+	public FileConfiguration iconfig;
 
 	String prefix = "";
 
@@ -26,19 +28,25 @@ public class Main extends JavaPlugin {
 	}
 
 	public void onEnable() {
+		System.out.println("Starting to enable plugin.");
 		main = this;
 		configurationConfig = new File(getDataFolder(), "config.yml");
 		config = YamlConfiguration.loadConfiguration(configurationConfig);
+		itemConfig = new File(getDataFolder(), "items.yml");
+		iconfig = YamlConfiguration.loadConfiguration(itemConfig);
 		loadConfig();
 		Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
 		getCommand("addspawn").setExecutor(new AddSpawnCommand());
+		getCommand("setlobby").setExecutor(new SetLobbyCommand());
 		MySQL = new MySQL(this, config.getString("sql.ip"), config.getString("sql.port"), config.getString("sql.database"), config.getString("sql.user"), config.getString("sql.pass"));
+		System.out.println("Starting to open MySQL Connection");
 		try {
 			c = MySQL.openConnection();
 		} catch (ClassNotFoundException | SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("OHKS HAS BEEN ENABLED!");
 	}
 
 	public void savec() {
@@ -50,13 +58,25 @@ public class Main extends JavaPlugin {
 		}
 	}
 
+	public void saveic() {
+		try {
+			iconfig.save(itemConfig);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void loadConfig() {
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add("Default Lore");
+		config.addDefault("scoreboard.displayname", "Survive..");
+		config.addDefault("sign.detectorline", "[ohks]");
+		config.addDefault("message.setlobby", "Lobby locations has been set to LOC");
 		config.addDefault("message.addspawn", "You've added a spawnpoint at LOC.");
-		config.addDefault("sql.pass", "password");
-		config.addDefault("sql.user", "minecraft");
-		config.addDefault("sql.database", "ohks");
+		config.addDefault("sql.pass", "pass");
+		config.addDefault("sql.user", "name");
+		config.addDefault("sql.database", "dbname");
 		config.addDefault("sql.port", "3306");
 		config.addDefault("sql.ip", "localhost");
 		ArrayList<String> ditems = new ArrayList<String>();
@@ -106,7 +126,9 @@ public class Main extends JavaPlugin {
 		config.addDefault("message.onlyplayer", "&4Error: Only players may use this function.");
 		config.addDefault("prefix", "");
 		config.options().copyDefaults(true);
+		iconfig.options().copyDefaults(true);
 		savec();
+		saveic();
 		prefix = config.getString("prefix");
 
 	}

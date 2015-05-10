@@ -1,4 +1,4 @@
-package ohks;
+package ohkm;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -39,7 +39,7 @@ public class SQLMethods {
 
 	public synchronized int newPlayer(Player player) {
 		int keyid = 0;
-		String query = "INSERT INTO accounts (uuid, username,kills) VALUES (?, ?, ?)";
+		String query = "INSERT INTO accounts (uuid, name,kills) VALUES (?, ?, ?)";
 		PreparedStatement ps;
 		try {
 			ps = plugin.c.prepareStatement(query);

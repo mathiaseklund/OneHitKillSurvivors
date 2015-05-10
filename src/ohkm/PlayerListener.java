@@ -1,6 +1,8 @@
-package ohks;
+package ohkm;
 
 import java.util.ArrayList;
+
+import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,6 +31,7 @@ public class PlayerListener implements Listener {
 	Messages msg = Messages.getInstance();
 	Utils util = Utils.getInstance();
 	Methods methods = Methods.getInstance();
+	SQLMethods sqlm = SQLMethods.getInstance();
 
 	public static PlayerListener getInstance() {
 		return instance;
@@ -38,6 +41,7 @@ public class PlayerListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		player.setMaxHealth(6);
+		Lists.id.put(player.getName(), sqlm.getID(player));
 	}
 
 	@EventHandler
@@ -75,8 +79,8 @@ public class PlayerListener implements Listener {
 				}
 				Lists.ingame.add(player.getName());
 				methods.updateScoreboard(player, 0);
-				methods.openClassWindow(player);
 				methods.updateSigns();
+				methods.openClassWindow(player);
 			}
 		}
 	}
@@ -106,6 +110,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event) {
 		Player player = (Player) event.getWhoClicked();
 		Inventory inv = event.getInventory();

@@ -1,8 +1,10 @@
-main: ohks.Main
-name: OneHitKillSurvivors
+main: ohkm.Main
+name: OneHitKillMedieval
 version: 0.1
 author: MathiasEklund
 commands:
   addspawn:
+  setlobby:
 permissions:
   ohks.admin:
+    description: Allows access to admin features.

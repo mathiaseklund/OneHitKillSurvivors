@@ -1,4 +1,4 @@
-package ohks;
+package ohkm;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
