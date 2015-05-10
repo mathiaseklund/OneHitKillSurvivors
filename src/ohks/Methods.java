@@ -142,6 +142,7 @@ public class Methods {
 
 	public void killPlayer(Player player, Player killer) {
 		player.setHealth(6);
+		player.getInventory().clear();
 		player.teleport(Bukkit.getWorld("world").getSpawnLocation());
 		Lists.ingame.remove(player.getName());
 		Lists.classtype.remove(player.getName());
