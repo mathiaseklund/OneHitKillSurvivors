@@ -2,6 +2,7 @@ package ohks;
 
 import java.util.ArrayList;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -10,8 +11,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class PlayerListener implements Listener {
 
@@ -29,6 +35,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
+		player.setMaxHealth(6);
 	}
 
 	@EventHandler
@@ -65,7 +72,8 @@ public class PlayerListener implements Listener {
 					Lists.ingame.remove(player.getName());
 				}
 				Lists.ingame.add(player.getName());
-				methods.spawnPlayer(player);
+				methods.updateScoreboard(player, 0);
+				methods.openClassWindow(player);
 				methods.updateSigns();
 			}
 		}
@@ -81,6 +89,35 @@ public class PlayerListener implements Listener {
 				double damage = event.getDamage();
 				if ((health - damage) <= 0) {
 					methods.killPlayer(player, damager);
+				}
+			}
+		}
+	}
+
+	public void onInventoryClose(InventoryCloseEvent event) {
+		Player player = (Player) event.getPlayer();
+		if (Lists.chooseclass.contains(player.getName())) {
+			methods.openClassWindow(player);
+		}
+	}
+
+	public void onInventoryClick(InventoryClickEvent event) {
+		Player player = (Player) event.getWhoClicked();
+		Inventory inv = event.getInventory();
+		String title = inv.getTitle();
+		if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.title")))) {
+			event.setCancelled(true);
+			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+				ItemStack is = event.getCurrentItem();
+				if (is.hasItemMeta()) {
+					ItemMeta im = is.getItemMeta();
+					String dname = im.getDisplayName();
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.citizen.displayname")))) {
+						Lists.chooseclass.remove(player.getName());
+						Lists.classtype.put(player.getName(), "citizen");
+						methods.giveItems(player);
+						methods.spawnPlayer(player);
+					}
 				}
 			}
 		}
