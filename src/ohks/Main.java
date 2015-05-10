@@ -31,6 +31,7 @@ public class Main extends JavaPlugin {
 		config = YamlConfiguration.loadConfiguration(configurationConfig);
 		loadConfig();
 		Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+		getCommand("addspawn").setExecutor(new AddSpawnCommand());
 		MySQL = new MySQL(this, config.getString("sql.ip"), config.getString("sql.port"), config.getString("sql.database"), config.getString("sql.user"), config.getString("sql.pass"));
 		try {
 			c = MySQL.openConnection();
@@ -52,6 +53,7 @@ public class Main extends JavaPlugin {
 	public void loadConfig() {
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add("Default Lore");
+		config.addDefault("message.addspawn", "You've added a spawnpoint at LOC.");
 		config.addDefault("sql.pass", "password");
 		config.addDefault("sql.user", "minecraft");
 		config.addDefault("sql.database", "ohks");
