@@ -1,6 +1,6 @@
 main: ohkm.Main
 name: OneHitKillMedieval
-version: 0.1
+version: 0.7
 author: MathiasEklund
 commands:
   addspawn:

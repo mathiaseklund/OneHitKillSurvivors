@@ -45,6 +45,20 @@ public class Methods {
 			Lists.chooseclass.add(player.getName());
 		}
 		Inventory inv = Bukkit.createInventory(player, 9, util.colorString(plugin.config.getString("classwindow.title")));
+
+		// cosmetics icon itemstack
+		ItemStack cosmetics = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.cosmetics.icon")));
+		ItemMeta cosmeticsm = cosmetics.getItemMeta();
+		cosmeticsm.setDisplayName(util.colorString(plugin.config.getString("classwindow.cosmetics.displayname")));
+		List<String> cosmeticslore1 = plugin.config.getStringList("classwindow.cosmetics.lore");
+		ArrayList<String> cosmeticslore = new ArrayList<String>();
+		for (String s : cosmeticslore1) {
+			cosmeticslore.add(util.colorString(s));
+		}
+		cosmeticsm.setLore(cosmeticslore);
+		cosmetics.setItemMeta(cosmeticsm);
+		inv.setItem(0, cosmetics);
+
 		// knight icon itemstack
 		ItemStack knight = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.knight.icon")));
 		ItemMeta knightm = knight.getItemMeta();
@@ -56,20 +70,7 @@ public class Methods {
 		}
 		knightm.setLore(knightlore);
 		knight.setItemMeta(knightm);
-		inv.setItem(0, knight);
-
-		// knight cosmetics icon itemstack
-		ItemStack knightcos = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.knightcos.icon")));
-		ItemMeta knightcosm = knightcos.getItemMeta();
-		knightcosm.setDisplayName(util.colorString(plugin.config.getString("classwindow.knightcos.displayname")));
-		List<String> knightcoslore1 = plugin.config.getStringList("classwindow.knightcos.lore");
-		ArrayList<String> knightcoslore = new ArrayList<String>();
-		for (String s : knightcoslore1) {
-			knightcoslore.add(util.colorString(s));
-		}
-		knightcosm.setLore(knightcoslore);
-		knightcos.setItemMeta(knightcosm);
-		inv.setItem(1, knightcos);
+		inv.setItem(2, knight);
 
 		// barbarian icon itemstack
 		ItemStack barbarian = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.barbarian.icon")));
@@ -82,20 +83,7 @@ public class Methods {
 		}
 		barbarianm.setLore(barbarianlore);
 		barbarian.setItemMeta(barbarianm);
-		inv.setItem(3, barbarian);
-
-		// barbarian cosmetics icon itemstack
-		ItemStack barbariancos = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.barbariancos.icon")));
-		ItemMeta barbariancosm = barbariancos.getItemMeta();
-		barbariancosm.setDisplayName(util.colorString(plugin.config.getString("classwindow.barbariancos.displayname")));
-		List<String> barbariancoslore1 = plugin.config.getStringList("classwindow.barbariancos.lore");
-		ArrayList<String> barbariancoslore = new ArrayList<String>();
-		for (String s : barbariancoslore1) {
-			barbariancoslore.add(util.colorString(s));
-		}
-		barbariancosm.setLore(barbariancoslore);
-		barbariancos.setItemMeta(barbariancosm);
-		inv.setItem(4, barbariancos);
+		inv.setItem(4, barbarian);
 
 		// warrior icon itemstack
 		ItemStack warrior = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.warrior.icon")));
@@ -109,19 +97,6 @@ public class Methods {
 		warriorm.setLore(warriorlore);
 		warrior.setItemMeta(warriorm);
 		inv.setItem(6, warrior);
-
-		// warrior cosmetics icon itemstack
-		ItemStack warriorcos = new ItemStack(Material.getMaterial(plugin.config.getInt("classwindow.warriorcos.icon")));
-		ItemMeta warriorcosm = warriorcos.getItemMeta();
-		warriorcosm.setDisplayName(util.colorString(plugin.config.getString("classwindow.warriorcos.displayname")));
-		List<String> warriorcoslore1 = plugin.config.getStringList("classwindow.warriorcos.lore");
-		ArrayList<String> warriorcoslore = new ArrayList<String>();
-		for (String s : warriorcoslore1) {
-			warriorcoslore.add(util.colorString(s));
-		}
-		warriorcosm.setLore(warriorcoslore);
-		warriorcos.setItemMeta(warriorcosm);
-		inv.setItem(7, warriorcos);
 
 		player.openInventory(inv);
 	}
@@ -143,18 +118,23 @@ public class Methods {
 	}
 
 	public void killPlayer(final Player player, Player killer) {
-		player.setHealth(6);
+		player.setHealth(2);
 		player.getInventory().clear();
-		player.teleport(Bukkit.getWorld("world").getSpawnLocation());
+		player.teleport(player.getWorld().getSpawnLocation());
 		Lists.ingame.remove(player.getName());
+		updateSigns();
 		Lists.classtype.remove(player.getName());
 		sqlm.addKill(killer);
-		int kills = Lists.kills.get(killer.getName());
+		int kills = 0;
+		if (Lists.kills.containsKey(killer.getName())) {
+			kills = Lists.kills.get(killer.getName());
+		}
 		kills++;
 		Lists.kills.remove(killer.getName());
 		Lists.kills.remove(player.getName());
 		Lists.kills.put(killer.getName(), kills);
-		updateScoreboard(player, kills);
+		updateScoreboard(killer, kills);
+		player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
 		msg.brdcst(plugin.config.getString("message.death").replace("TARGET", player.getName()).replace("KILLER", killer.getName()));
 		int gold = 5;
 		if (kills == 3 || kills == 5) {
@@ -197,6 +177,8 @@ public class Methods {
 				}
 			}, 20 * 7);
 		}
+		sqlm.addGold(killer, gold);
+		updateGold(killer);
 	}
 
 	public void updateScoreboard(Player player, int kills) {
@@ -211,7 +193,7 @@ public class Methods {
 		player.setScoreboard(board);
 	}
 
-	@SuppressWarnings({ "null", "deprecation" })
+	@SuppressWarnings({ "deprecation" })
 	public void giveItems(Player player) {
 		player.getInventory().clear();
 		String classtype = Lists.classtype.get(player.getName());
@@ -243,5 +225,96 @@ public class Methods {
 		gm.setDisplayName("Gold: " + sqlm.getGold(player));
 		gold.setItemMeta(gm);
 		player.getInventory().setItem(3, gold);
+	}
+
+	public void updateGold(Player player) {
+		ItemStack gold = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta gm = gold.getItemMeta();
+		gm.setDisplayName("Gold: " + sqlm.getGold(player));
+		gold.setItemMeta(gm);
+		player.getInventory().setItem(3, gold);
+	}
+
+	public void ItemCD4(final Player player, final int i, int time) {
+		if (i >= 1) {
+			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+				public void run() {
+					ItemStack is = player.getItemInHand();
+					double maxdur = is.getType().getMaxDurability();
+					double dur = is.getDurability();
+					if (i == 5) {
+						dur = (maxdur * 0.95);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD4(player, (i - 1), 20);
+					} else if (i == 4) {
+						dur = (maxdur * 0.75);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD4(player, (i - 1), 20);
+					} else if (i == 3) {
+						dur = (maxdur * 0.5);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD4(player, (i - 1), 20);
+					} else if (i == 2) {
+						dur = (maxdur * 0.25);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD4(player, (i - 1), 20);
+					} else if (i == 1) {
+						dur = (maxdur * 0);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						Lists.regen.remove(player.getName());
+					}
+
+				}
+			}, time);
+		}
+	}
+
+	public void ItemCD5(final Player player, final int i, int time) {
+		if (i >= 1) {
+			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+				public void run() {
+					ItemStack is = player.getItemInHand();
+					double maxdur = is.getType().getMaxDurability();
+					double dur = is.getDurability();
+					if (i == 6) {
+						dur = (maxdur * 0.95);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD5(player, (i - 1), 20);
+					} else if (i == 5) {
+						dur = (maxdur * 0.8);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD5(player, (i - 1), 20);
+					} else if (i == 4) {
+						dur = (maxdur * 0.6);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD5(player, (i - 1), 20);
+					} else if (i == 3) {
+						dur = (maxdur * 0.4);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD5(player, (i - 1), 20);
+					} else if (i == 2) {
+						dur = (maxdur * 0.2);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						ItemCD5(player, (i - 1), 20);
+					} else if (i == 1) {
+						dur = (maxdur * 0);
+						is.setDurability((short) dur);
+						player.setItemInHand(is);
+						Lists.regen.remove(player.getName());
+					}
+
+				}
+			}, time);
+		}
 	}
 }

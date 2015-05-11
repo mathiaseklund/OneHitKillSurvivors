@@ -12,4 +12,6 @@ public class Lists {
 	public static HashMap<String, Integer> id = new HashMap<String, Integer>();
 	public static HashMap<String, Integer> item = new HashMap<String, Integer>();
 	public static HashMap<String, Integer> timedkills = new HashMap<String, Integer>();
+	public static ArrayList<String> still = new ArrayList<String>();
+	public static ArrayList<String> regen = new ArrayList<String>();
 }

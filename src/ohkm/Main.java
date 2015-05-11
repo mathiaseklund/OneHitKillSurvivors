@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Main extends JavaPlugin {
@@ -50,6 +51,13 @@ public class Main extends JavaPlugin {
 		Methods.getInstance().updateSigns();
 	}
 
+	public void onDisable() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			player.getInventory().clear();
+			player.kickPlayer("Server Restart");
+		}
+	}
+
 	public void savec() {
 		try {
 			config.save(configurationConfig);
@@ -74,7 +82,7 @@ public class Main extends JavaPlugin {
 		config.addDefault("message.block", "You've BLOCKED USER's Attack!");
 		config.addDefault("message.disarm", "You've been DISARMED by USER.");
 		config.addDefault("message.dodge", "You've DODGED USER's Attack!");
-		config.addDefault("message.gold", "You've earned +## Gold.");
+		config.addDefault("message.gold", "Earned +## Gold");
 		config.addDefault("message.timed_streak", "USER has gotten a NAMED_KILL");
 		config.addDefault("message.death", "TARGET was killed by KILLER.");
 		config.addDefault("message.join", "USER has joined One-Hit Kill!");
@@ -109,15 +117,9 @@ public class Main extends JavaPlugin {
 		config.addDefault("classwindow.warrior.lore", lore);
 		config.addDefault("classwindow.warrior.displayname", "warrior");
 		config.addDefault("classwindow.warrior.icon", 1);
-		config.addDefault("classwindow.knightcos.lore", lore);
-		config.addDefault("classwindow.knightcos.displayname", "Knight Costmetics");
-		config.addDefault("classwindow.knightcos.icon", 1);
-		config.addDefault("classwindow.barbariancos.lore", lore);
-		config.addDefault("classwindow.barbariancos.displayname", "Barbarian Cosmetics");
-		config.addDefault("classwindow.barbariancos.icon", 1);
-		config.addDefault("classwindow.warriorcos.lore", lore);
-		config.addDefault("classwindow.warriorcos.displayname", "Warrior Cosmetics");
-		config.addDefault("classwindow.warriorcos.icon", 1);
+		config.addDefault("classwindow.cosmetics.lore", lore);
+		config.addDefault("classwindow.cosmetics.displayname", "Cosmetics");
+		config.addDefault("classwindow.cosmetics.icon", 1);
 		config.addDefault("classwindow.title", "Class Window");
 		config.addDefault("message.noperm", "&4Error: You don't have permission to use this function.");
 		config.addDefault("message.onlyplayer", "&4Error: Only players may use this function.");
