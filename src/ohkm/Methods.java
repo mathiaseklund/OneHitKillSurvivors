@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
@@ -199,11 +200,21 @@ public class Methods {
 		String classtype = Lists.classtype.get(player.getName());
 		if (Lists.item.containsKey(player.getName())) {
 			int itemid = Lists.item.get(player.getName());
-			ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(itemid + ".item")));
-			ItemMeta im = is.getItemMeta();
-			im.setDisplayName(util.colorString(plugin.iconfig.getString(itemid + ".name")));
-			is.setItemMeta(im);
-			player.getInventory().setItem(0, is);
+			String itemclass = plugin.iconfig.getString(itemid + ".class");
+			if (itemclass.equalsIgnoreCase(classtype)) {
+				ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(itemid + ".item")));
+				ItemMeta im = is.getItemMeta();
+				im.setDisplayName(util.colorString(plugin.iconfig.getString(itemid + ".name")));
+				is.setItemMeta(im);
+				player.getInventory().setItem(0, is);
+			} else {
+				itemid = plugin.config.getInt(classtype + ".defaultitem");
+				ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(itemid + ".item")));
+				ItemMeta im = is.getItemMeta();
+				im.setDisplayName(util.colorString(plugin.iconfig.getString(itemid + ".name")));
+				is.setItemMeta(im);
+				player.getInventory().setItem(0, is);
+			}
 		} else {
 			int itemid = plugin.config.getInt(classtype + ".defaultitem");
 			ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(itemid + ".item")));
@@ -316,5 +327,221 @@ public class Methods {
 				}
 			}, time);
 		}
+	}
+
+	public void openCosmeticsMenu(Player player) {
+		Inventory inv = Bukkit.createInventory(player, 9, util.colorString(plugin.config.getString("cosmeticsmenu.title")));
+
+		// knight cosmetic icon item
+		ItemStack knight = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.knight.item")));
+		ItemMeta knightm = knight.getItemMeta();
+		knightm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.knight.displayname")));
+		List<String> knightlore1 = plugin.config.getStringList("cosmeticsmenu.knight.lore");
+		ArrayList<String> knightlore = new ArrayList<String>();
+		for (String s : knightlore1) {
+			knightlore.add(util.colorString(s));
+		}
+		knightm.setLore(knightlore);
+		knight.setItemMeta(knightm);
+		inv.setItem(0, knight);
+
+		// barbarian cosmetic icon item
+		ItemStack barbarian = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.barbarian.item")));
+		ItemMeta barbarianm = barbarian.getItemMeta();
+		barbarianm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.barbarian.displayname")));
+		List<String> barbarianlore1 = plugin.config.getStringList("cosmeticsmenu.barbarian.lore");
+		ArrayList<String> barbarianlore = new ArrayList<String>();
+		for (String s : barbarianlore1) {
+			barbarianlore.add(util.colorString(s));
+		}
+		barbarianm.setLore(barbarianlore);
+		barbarian.setItemMeta(barbarianm);
+		inv.setItem(3, barbarian);
+
+		// warrior cosmetic icon item
+		ItemStack warrior = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.warrior.item")));
+		ItemMeta warriorm = warrior.getItemMeta();
+		warriorm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.warrior.displayname")));
+		List<String> warriorlore1 = plugin.config.getStringList("cosmeticsmenu.warrior.lore");
+		ArrayList<String> warriorlore = new ArrayList<String>();
+		for (String s : warriorlore1) {
+			warriorlore.add(util.colorString(s));
+		}
+		warriorm.setLore(warriorlore);
+		warrior.setItemMeta(warriorm);
+		inv.setItem(6, warrior);
+
+		// go back icon itemstack
+		ItemStack back = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.back.item")));
+		ItemMeta backm = back.getItemMeta();
+		backm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")));
+		List<String> backlore1 = plugin.config.getStringList("cosmeticsmenu.back.lore");
+		ArrayList<String> backlore = new ArrayList<String>();
+		for (String s : backlore1) {
+			backlore.add(util.colorString(s));
+		}
+		backm.setLore(backlore);
+		back.setItemMeta(backm);
+		inv.setItem(8, back);
+
+		player.openInventory(inv);
+	}
+
+	public void openKnightCosmeticsMenu(Player player) {
+		Inventory inv = Bukkit.createInventory(player, 36, util.colorString(plugin.config.getString("knightcosmetics.title")));
+		String[] owneditems = sqlm.getItems(player);
+		for (int i = 0; i < 99; i++) {
+			if (plugin.iconfig.getInt(i + ".item") != 0) {
+				if (plugin.iconfig.getString(i + ".class") != null) {
+					if (plugin.iconfig.getString(i + ".class").equalsIgnoreCase("knight")) {
+						ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(i + ".item")));
+						ItemMeta im = is.getItemMeta();
+						im.setDisplayName(util.colorString(plugin.iconfig.getString(i + ".name")));
+						ArrayList<String> lore = new ArrayList<String>();
+						boolean contains = false;
+						for (String s : owneditems) {
+							if (!s.equalsIgnoreCase("")) {
+								int si = Integer.parseInt(s);
+								if (si == i) {
+									contains = true;
+								}
+							}
+						}
+						if (contains) {
+							if (Lists.item.get(player.getName()) == i) {
+								lore.add(ChatColor.RED + "SELECTED");
+							} else {
+								lore.add(ChatColor.GREEN + "SELECT");
+							}
+						} else {
+							lore.add(ChatColor.GOLD + "PURCHASE FOR " + plugin.iconfig.getInt(i + ".price") + " GOLD");
+						}
+						lore.add(ChatColor.COLOR_CHAR + "" + i);
+						im.setLore(lore);
+						is.setItemMeta(im);
+						inv.addItem(is);
+					}
+				}
+			}
+		}
+
+		// go back icon itemstack
+		ItemStack back = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.back.item")));
+		ItemMeta backm = back.getItemMeta();
+		backm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")));
+		List<String> backlore1 = plugin.config.getStringList("cosmeticsmenu.back.lore");
+		ArrayList<String> backlore = new ArrayList<String>();
+		for (String s : backlore1) {
+			backlore.add(util.colorString(s));
+		}
+		backm.setLore(backlore);
+		back.setItemMeta(backm);
+		inv.setItem(35, back);
+
+		player.openInventory(inv);
+	}
+
+	public void openBarbarianCosmeticsMenu(Player player) {
+		Inventory inv = Bukkit.createInventory(player, 36, util.colorString(plugin.config.getString("barbariancosmetics.title")));
+		String[] owneditems = sqlm.getItems(player);
+		for (int i = 0; i < 99; i++) {
+			if (plugin.iconfig.getInt(i + ".item") != 0) {
+				if (plugin.iconfig.getString(i + ".class") != null) {
+					if (plugin.iconfig.getString(i + ".class").equalsIgnoreCase("barbarian")) {
+						ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(i + ".item")));
+						ItemMeta im = is.getItemMeta();
+						im.setDisplayName(util.colorString(plugin.iconfig.getString(i + ".name")));
+						ArrayList<String> lore = new ArrayList<String>();
+						boolean contains = false;
+						for (String s : owneditems) {
+							if (!s.equalsIgnoreCase("")) {
+								int si = Integer.parseInt(s);
+								if (si == i) {
+									contains = true;
+								}
+							}
+						}
+						if (contains) {
+							if (Lists.item.get(player.getName()) == i) {
+								lore.add(ChatColor.RED + "SELECTED");
+							} else {
+								lore.add(ChatColor.GREEN + "SELECT");
+							}
+						} else {
+							lore.add(ChatColor.GOLD + "PURCHASE FOR " + plugin.iconfig.getInt(i + ".price") + " GOLD");
+						}
+						lore.add(ChatColor.COLOR_CHAR + "" + i);
+						im.setLore(lore);
+						is.setItemMeta(im);
+						inv.addItem(is);
+					}
+				}
+			}
+		}
+
+		// go back icon itemstack
+		ItemStack back = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.back.item")));
+		ItemMeta backm = back.getItemMeta();
+		backm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")));
+		List<String> backlore1 = plugin.config.getStringList("cosmeticsmenu.back.lore");
+		ArrayList<String> backlore = new ArrayList<String>();
+		for (String s : backlore1) {
+			backlore.add(util.colorString(s));
+		}
+		backm.setLore(backlore);
+		back.setItemMeta(backm);
+		inv.setItem(35, back);
+	}
+
+	public void openWarriorCosmeticsMenu(Player player) {
+		Inventory inv = Bukkit.createInventory(player, 36, util.colorString(plugin.config.getString("warriorcosmetics.title")));
+		String[] owneditems = sqlm.getItems(player);
+		for (int i = 0; i < 99; i++) {
+			if (plugin.iconfig.getInt(i + ".item") != 0) {
+				if (plugin.iconfig.getString(i + ".class") != null) {
+					if (plugin.iconfig.getString(i + ".class").equalsIgnoreCase("warrior")) {
+						ItemStack is = new ItemStack(Material.getMaterial(plugin.iconfig.getInt(i + ".item")));
+						ItemMeta im = is.getItemMeta();
+						im.setDisplayName(util.colorString(plugin.iconfig.getString(i + ".name")));
+						ArrayList<String> lore = new ArrayList<String>();
+						boolean contains = false;
+						for (String s : owneditems) {
+							if (!s.equalsIgnoreCase("")) {
+								int si = Integer.parseInt(s);
+								if (si == i) {
+									contains = true;
+								}
+							}
+						}
+						if (contains) {
+							if (Lists.item.get(player.getName()) == i) {
+								lore.add(ChatColor.RED + "SELECTED");
+							} else {
+								lore.add(ChatColor.GREEN + "SELECT");
+							}
+						} else {
+							lore.add(ChatColor.GOLD + "PURCHASE FOR " + plugin.iconfig.getInt(i + ".price") + " GOLD");
+						}
+						lore.add(ChatColor.COLOR_CHAR + "" + i);
+						im.setLore(lore);
+						is.setItemMeta(im);
+						inv.addItem(is);
+					}
+				}
+			}
+		}
+
+		// go back icon itemstack
+		ItemStack back = new ItemStack(Material.getMaterial(plugin.config.getInt("cosmeticsmenu.back.item")));
+		ItemMeta backm = back.getItemMeta();
+		backm.setDisplayName(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")));
+		List<String> backlore1 = plugin.config.getStringList("cosmeticsmenu.back.lore");
+		ArrayList<String> backlore = new ArrayList<String>();
+		for (String s : backlore1) {
+			backlore.add(util.colorString(s));
+		}
+		backm.setLore(backlore);
+		back.setItemMeta(backm);
+		inv.setItem(35, back);
 	}
 }

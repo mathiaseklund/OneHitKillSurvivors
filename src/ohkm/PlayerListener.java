@@ -3,6 +3,7 @@ package ohkm;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -196,6 +197,141 @@ public class PlayerListener implements Listener {
 						Lists.classtype.put(player.getName(), "warrior");
 						methods.giveItems(player);
 						methods.spawnPlayer(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("classwindow.cosmetics.displayname")))) {
+						methods.openCosmeticsMenu(player);
+					}
+				}
+			}
+		} else if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.title")))) {
+			event.setCancelled(true);
+			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+				ItemStack is = event.getCurrentItem();
+				if (is.hasItemMeta()) {
+					ItemMeta im = is.getItemMeta();
+					String dname = im.getDisplayName();
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.knight.displayname")))) {
+						methods.openKnightCosmeticsMenu(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.barbarian.displayname")))) {
+						methods.openBarbarianCosmeticsMenu(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.warrior.displayname")))) {
+						methods.openWarriorCosmeticsMenu(player);
+					} else if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")))) {
+						methods.openClassWindow(player);
+					}
+				}
+			}
+		} else if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("knightcosmetics.title")))) {
+			event.setCancelled(true);
+			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+				ItemStack is = event.getCurrentItem();
+				if (is.hasItemMeta()) {
+					ItemMeta im = is.getItemMeta();
+					String dname = im.getDisplayName();
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")))) {
+						methods.openCosmeticsMenu(player);
+					} else {
+						String state = ChatColor.stripColor(im.getLore().get(0));
+						if (state.equalsIgnoreCase("SELECT")) {
+							int id = Integer.parseInt(ChatColor.stripColor(im.getLore().get(1)));
+							Lists.item.remove(player.getName());
+							Lists.item.put(player.getName(), id);
+							methods.openKnightCosmeticsMenu(player);
+						} else if (state.equalsIgnoreCase("SELECTED")) {
+							Lists.item.remove(player.getName());
+							methods.openKnightCosmeticsMenu(player);
+						} else if (state.contains("PURCHASE")) {
+							String sid = im.getLore().get(1).replace("§", "");
+							int id = Integer.parseInt(sid);
+							int cost = Integer.parseInt(state.replaceAll("[\\D]", ""));
+							int gold = sqlm.getGold(player);
+							if (gold >= cost) {
+								// PLAYER PURCHASES AND SELECTS ITEM
+								gold = (gold - cost);
+								sqlm.setGold(player, gold);
+								sqlm.addItem(player, id);
+								Lists.item.remove(player.getName());
+								Lists.item.put(player.getName(), id);
+								methods.openKnightCosmeticsMenu(player);
+							} else {
+								msg.msg(player, "&4ERROR: You don't have enough gold to purchase this item.");
+							}
+						}
+					}
+				}
+			}
+		} else if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("barbariancosmetics.title")))) {
+			event.setCancelled(true);
+			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+				ItemStack is = event.getCurrentItem();
+				if (is.hasItemMeta()) {
+					ItemMeta im = is.getItemMeta();
+					String dname = im.getDisplayName();
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")))) {
+						methods.openCosmeticsMenu(player);
+					} else {
+						String state = ChatColor.stripColor(im.getLore().get(0));
+						if (state.equalsIgnoreCase("SELECT")) {
+							int id = Integer.parseInt(ChatColor.stripColor(im.getLore().get(1)));
+							Lists.item.remove(player.getName());
+							Lists.item.put(player.getName(), id);
+							methods.openBarbarianCosmeticsMenu(player);
+						} else if (state.equalsIgnoreCase("SELECTED")) {
+							Lists.item.remove(player.getName());
+							methods.openBarbarianCosmeticsMenu(player);
+						} else if (state.contains("PURCHASE")) {
+							int id = Integer.parseInt(ChatColor.stripColor(im.getLore().get(1)));
+							int cost = Integer.parseInt(state.replaceAll("[\\D]", ""));
+							int gold = sqlm.getGold(player);
+							if (gold >= cost) {
+								// PLAYER PURCHASES AND SELECTS ITEM
+								gold = (gold - cost);
+								sqlm.setGold(player, gold);
+								sqlm.addItem(player, id);
+								Lists.item.remove(player.getName());
+								Lists.item.put(player.getName(), id);
+								methods.openBarbarianCosmeticsMenu(player);
+							} else {
+								msg.msg(player, "&4ERROR: You don't have enough gold to purchase this item.");
+							}
+						}
+					}
+				}
+			}
+		} else if (title.equalsIgnoreCase(util.colorString(plugin.config.getString("warriorcosmetics.title")))) {
+			event.setCancelled(true);
+			if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+				ItemStack is = event.getCurrentItem();
+				if (is.hasItemMeta()) {
+					ItemMeta im = is.getItemMeta();
+					String dname = im.getDisplayName();
+					if (dname.equalsIgnoreCase(util.colorString(plugin.config.getString("cosmeticsmenu.back.displayname")))) {
+						methods.openCosmeticsMenu(player);
+					} else {
+						String state = ChatColor.stripColor(im.getLore().get(0));
+						if (state.equalsIgnoreCase("SELECT")) {
+							int id = Integer.parseInt(ChatColor.stripColor(im.getLore().get(1)));
+							Lists.item.remove(player.getName());
+							Lists.item.put(player.getName(), id);
+							methods.openWarriorCosmeticsMenu(player);
+						} else if (state.equalsIgnoreCase("SELECTED")) {
+							Lists.item.remove(player.getName());
+							methods.openWarriorCosmeticsMenu(player);
+						} else if (state.contains("PURCHASE")) {
+							int id = Integer.parseInt(ChatColor.stripColor(im.getLore().get(1)));
+							int cost = Integer.parseInt(state.replaceAll("[\\D]", ""));
+							int gold = sqlm.getGold(player);
+							if (gold >= cost) {
+								// PLAYER PURCHASES AND SELECTS ITEM
+								gold = (gold - cost);
+								sqlm.setGold(player, gold);
+								sqlm.addItem(player, id);
+								Lists.item.remove(player.getName());
+								Lists.item.put(player.getName(), id);
+								methods.openWarriorCosmeticsMenu(player);
+							} else {
+								msg.msg(player, "&4ERROR: You don't have enough gold to purchase this item.");
+							}
+						}
 					}
 				}
 			}

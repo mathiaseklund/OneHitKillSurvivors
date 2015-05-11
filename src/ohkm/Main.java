@@ -79,6 +79,34 @@ public class Main extends JavaPlugin {
 	public void loadConfig() {
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add("Default Lore");
+		config.addDefault("warriorcosmetics.title", "Warrior Cosmetics");
+		config.addDefault("barbariancosmetics.title", "Barbarian Cosmetics");
+		config.addDefault("knightcosmetics.title", "Knight Cosmetics");
+		config.addDefault("cosmeticsmenu.knight.lore", lore);
+		config.addDefault("cosmeticsmenu.knight.displayname", "Knight Cosmetics");
+		config.addDefault("cosmeticsmenu.knight.item", 1);
+		config.addDefault("cosmeticsmenu.barbarian.lore", lore);
+		config.addDefault("cosmeticsmenu.barbarian.displayname", "barbarian Cosmetics");
+		config.addDefault("cosmeticsmenu.barbarian.item", 1);
+		config.addDefault("cosmeticsmenu.warrior.lore", lore);
+		config.addDefault("cosmeticsmenu.warrior.displayname", "warrior Cosmetics");
+		config.addDefault("cosmeticsmenu.warrior.item", 1);
+		config.addDefault("cosmeticsmenu.back.lore", lore);
+		config.addDefault("cosmeticsmenu.back.displayname", "Go Back");
+		config.addDefault("cosmeticsmenu.back.item", 1);
+		config.addDefault("cosmeticsmenu.title", "Cosmetics Menu");
+		iconfig.addDefault("4.item", 272);
+		iconfig.addDefault("4.name", "Knights Stone Sword");
+		iconfig.addDefault("4.class", "knight");
+		iconfig.addDefault("4.price", 150);
+		iconfig.addDefault("5.item", 273);
+		iconfig.addDefault("5.name", "Warriors Stone Spear");
+		iconfig.addDefault("5.class", "warrior");
+		iconfig.addDefault("5.price", 150);
+		iconfig.addDefault("6.item", 275);
+		iconfig.addDefault("6.name", "Barbarians Stone Axe");
+		iconfig.addDefault("6.class", "barbarian");
+		iconfig.addDefault("6.price", 150);
 		config.addDefault("message.block", "You've BLOCKED USER's Attack!");
 		config.addDefault("message.disarm", "You've been DISARMED by USER.");
 		config.addDefault("message.dodge", "You've DODGED USER's Attack!");
@@ -131,5 +159,4 @@ public class Main extends JavaPlugin {
 		prefix = config.getString("prefix");
 
 	}
-
 }

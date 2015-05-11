@@ -49,12 +49,27 @@ public class SQLMethods {
 			ps.setInt(4, 0);
 			ps.execute();
 			keyid = getID(player);
+			setupItems(player);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return keyid;
 
+	}
+
+	public synchronized void setupItems(Player player) {
+		String query = "INSERT INTO items (id, items) VALUES (?,?)";
+		PreparedStatement ps;
+		try {
+			ps = plugin.c.prepareStatement(query);
+			ps.setInt(1, getID(player));
+			ps.setString(2, "");
+			ps.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public synchronized int getKills(Player player) {
@@ -126,6 +141,43 @@ public class SQLMethods {
 		try {
 			PreparedStatement ps = plugin.c.prepareStatement(query);
 			ps.setInt(1, gold);
+			ps.setInt(2, Lists.id.get(player.getName()));
+			ps.execute();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public synchronized String[] getItems(Player player) {
+		String[] items = null;
+		int id = Lists.id.get(player.getName());
+		String query = "SELECT items FROM items WHERE id = ?";
+		try {
+			PreparedStatement ps = plugin.c.prepareStatement(query);
+			ps.setInt(1, id);
+			ResultSet rs = ps.executeQuery();
+			if (rs.next()) {
+				String items2 = rs.getString(1);
+				items = items2.split(",");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return items;
+	}
+
+	public synchronized void addItem(Player player, int item) {
+		String query = "UPDATE items SET items=? WHERE id=?";
+		String items = null;
+		String[] strings = getItems(player);
+		for (String s : strings) {
+			items = items + s + ",";
+		}
+		try {
+			PreparedStatement ps = plugin.c.prepareStatement(query);
+			ps.setString(1, items);
 			ps.setInt(2, Lists.id.get(player.getName()));
 			ps.execute();
 		} catch (SQLException e) {
